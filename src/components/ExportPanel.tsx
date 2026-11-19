@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { ExportQuality, CompressionMode } from '../types/pdf';
 import type { FilterTargetMode } from '../hooks/usePDFFilters';
-import { FileDown, Image, ShieldCheck } from 'lucide-react';
+import { FileDown, Image, ShieldCheck, Scissors } from 'lucide-react';
 
 interface ExportPanelProps {
   currentPage: number;
@@ -10,6 +10,7 @@ interface ExportPanelProps {
   onTargetModeChange: (mode: FilterTargetMode) => void;
   onExportPDF: (quality: ExportQuality, compressionMode: CompressionMode) => void;
   onExportImage: (format: 'png' | 'jpg', quality: ExportQuality) => void;
+  onOpenSplit?: () => void;
   isExporting: boolean;
 }
 
@@ -20,6 +21,7 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
   onTargetModeChange,
   onExportPDF,
   onExportImage,
+  onOpenSplit,
   isExporting,
 }) => {
   const [selectedQuality, setSelectedQuality] = useState<ExportQuality>('high');
@@ -198,6 +200,28 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
           ))}
         </div>
       </div>
+
+      {/* Split PDF Option Card */}
+      {onOpenSplit && (
+        <div className="p-3 bg-gradient-to-r from-indigo-50/80 via-blue-50/60 to-slate-50 border border-indigo-200/80 rounded-2xl flex items-center justify-between gap-2 shadow-2xs">
+          <div>
+            <p className="font-bold text-xs text-indigo-950 flex items-center">
+              <Scissors className="w-3.5 h-3.5 mr-1.5 text-indigo-600" />
+              Split or Extract Pages
+            </p>
+            <p className="text-[11px] text-slate-600 mt-0.5">
+              Extract specific page ranges or split into separate PDFs.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onOpenSplit}
+            className="px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-95 shadow-xs transition-all cursor-pointer whitespace-nowrap"
+          >
+            Split Tool
+          </button>
+        </div>
+      )}
 
       {/* Transparency / Limitation Disclosure Note */}
       <div className="p-3 bg-indigo-50/70 border border-indigo-200/80 rounded-xl text-xs text-indigo-900 space-y-1">

@@ -9,6 +9,7 @@ import { FilterPanel } from './FilterPanel';
 import { AdjustmentSliders } from './AdjustmentSliders';
 import { ExportPanel } from './ExportPanel';
 import { ProgressIndicator } from './ProgressIndicator';
+import { SplitModal } from './SplitModal';
 import type { ExportQuality, CompressionMode } from '../types/pdf';
 import {
   Sparkles,
@@ -19,6 +20,7 @@ import {
   PanelLeftOpen,
   ChevronDown,
   ChevronUp,
+  Scissors,
 } from 'lucide-react';
 
 interface PDFWorkspaceProps {
@@ -57,6 +59,7 @@ export const PDFWorkspace: React.FC<PDFWorkspaceProps> = ({
   const [activeTab, setActiveTab] = useState<TabType>('filters');
   const [isThumbnailsOpen, setIsThumbnailsOpen] = useState<boolean>(true);
   const [isMobileSheetCollapsed, setIsMobileSheetCollapsed] = useState<boolean>(false);
+  const [isSplitModalOpen, setIsSplitModalOpen] = useState<boolean>(false);
 
   const handleExportPDF = (quality: ExportQuality, compressionMode: CompressionMode) => {
     triggerExport(
@@ -109,8 +112,19 @@ export const PDFWorkspace: React.FC<PDFWorkspaceProps> = ({
           </div>
         </div>
 
-        {/* Customized indicator count */}
+        {/* Right sub-header actions: Split PDF & custom badge */}
         <div className="flex items-center space-x-2">
+          {/* Prominent Split PDF Trigger */}
+          <button
+            type="button"
+            onClick={() => setIsSplitModalOpen(true)}
+            className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80 transition-all shadow-2xs active:scale-[0.98] cursor-pointer"
+            title="Split or Extract PDF Pages"
+          >
+            <Scissors className="w-3.5 h-3.5 text-indigo-600" />
+            <span>Split PDF</span>
+          </button>
+
           {pageConfigs.size > 0 ? (
             <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-medium text-[11px]">
               {pageConfigs.size} {pageConfigs.size === 1 ? 'page' : 'pages'} custom
@@ -228,6 +242,7 @@ export const PDFWorkspace: React.FC<PDFWorkspaceProps> = ({
                 onTargetModeChange={setTargetMode}
                 onExportPDF={handleExportPDF}
                 onExportImage={handleExportImage}
+                onOpenSplit={() => setIsSplitModalOpen(true)}
                 isExporting={progress.isExporting}
               />
             )}
@@ -328,6 +343,15 @@ export const PDFWorkspace: React.FC<PDFWorkspaceProps> = ({
                 <Download className="w-3.5 h-3.5 mr-1" />
                 Export
               </button>
+
+              <button
+                type="button"
+                onClick={() => setIsSplitModalOpen(true)}
+                className="flex items-center px-2.5 py-1.5 rounded-lg text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 whitespace-nowrap transition-colors"
+              >
+                <Scissors className="w-3.5 h-3.5 mr-1 text-indigo-600" />
+                Split
+              </button>
             </div>
 
             {/* Collapse / Expand Tool Sheet Toggle */}
@@ -388,6 +412,7 @@ export const PDFWorkspace: React.FC<PDFWorkspaceProps> = ({
                   onTargetModeChange={setTargetMode}
                   onExportPDF={handleExportPDF}
                   onExportImage={handleExportImage}
+                  onOpenSplit={() => setIsSplitModalOpen(true)}
                   isExporting={progress.isExporting}
                 />
               )}
@@ -395,6 +420,18 @@ export const PDFWorkspace: React.FC<PDFWorkspaceProps> = ({
           )}
         </div>
       </div>
+
+      {/* Split & Extract Modal */}
+      <SplitModal
+        isOpen={isSplitModalOpen}
+        onClose={() => setIsSplitModalOpen(false)}
+        doc={doc}
+        dimensions={dimensions}
+        pageConfigs={pageConfigs}
+        defaultConfig={getPageConfig(currentPage)}
+        arrayBuffer={loadedPDF.arrayBuffer}
+        fileName={info.name}
+      />
 
       {/* Export Progress Modal */}
       <ProgressIndicator progress={progress} onCancel={cancelExport} />
