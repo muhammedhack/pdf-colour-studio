@@ -10,6 +10,8 @@ import { AdjustmentSliders } from './AdjustmentSliders';
 import { ExportPanel } from './ExportPanel';
 import { ProgressIndicator } from './ProgressIndicator';
 import { SplitModal } from './SplitModal';
+import { OCRPanel } from './OCRPanel';
+import { useOCR } from '../hooks/useOCR';
 import type { ExportQuality, CompressionMode } from '../types/pdf';
 import {
   Sparkles,
@@ -21,6 +23,7 @@ import {
   ChevronDown,
   ChevronUp,
   Scissors,
+  Brain,
 } from 'lucide-react';
 
 interface PDFWorkspaceProps {
@@ -29,7 +32,7 @@ interface PDFWorkspaceProps {
   onOpenNew: () => void;
 }
 
-type TabType = 'filters' | 'adjust' | 'pages' | 'export';
+type TabType = 'filters' | 'adjust' | 'ocr' | 'pages' | 'export';
 
 export const PDFWorkspace: React.FC<PDFWorkspaceProps> = ({
   loadedPDF,
@@ -55,6 +58,38 @@ export const PDFWorkspace: React.FC<PDFWorkspaceProps> = ({
   } = usePDFFilters();
 
   const { progress, exportError, triggerExport, exportSingleImage, cancelExport } = usePDFExport();
+
+  const {
+    results: ocrResults,
+    jobStatus: ocrJobStatus,
+    selectedLang: ocrSelectedLang,
+    selectedEngine: ocrSelectedEngine,
+    enhanceImage: ocrEnhanceImage,
+    ttsState: ocrTtsState,
+    activeSpokenWord: ocrActiveSpokenWord,
+    setSelectedLang: setOcrSelectedLang,
+    setSelectedEngine: setOcrSelectedEngine,
+    setEnhanceImage: setOcrEnhanceImage,
+    recognizePage: recognizeOcrPage,
+    recognizeAllPages: recognizeOcrAllPages,
+    cancelJob: cancelOcrJob,
+    playTTS: playOcrTTS,
+    pauseTTS: pauseOcrTTS,
+    resumeTTS: resumeOcrTTS,
+    stopTTS: stopOcrTTS,
+    setTTSRate: setOcrTTSRate,
+    copyCurrentPageText: copyOcrCurrentPageText,
+    copyAllPagesText: copyOcrAllPagesText,
+    downloadCurrentPageTxt: downloadOcrCurrentPageTxt,
+    downloadAllTxt: downloadOcrAllTxt,
+    downloadAllJSON: downloadOcrAllJSON,
+    downloadAllMarkdown: downloadOcrAllMarkdown,
+    downloadPDFReport: downloadOcrPDFReport,
+  } = useOCR({
+    doc,
+    renderer,
+    docName: info.name,
+  });
 
   const [activeTab, setActiveTab] = useState<TabType>('filters');
   const [isThumbnailsOpen, setIsThumbnailsOpen] = useState<boolean>(true);
@@ -169,50 +204,72 @@ export const PDFWorkspace: React.FC<PDFWorkspaceProps> = ({
             filterConfig={activeConfig}
             onPageChange={setCurrentPage}
             onResetPage={resetCurrentPage}
+            onOpenOCR={() => {
+              setActiveTab('ocr');
+              setIsMobileSheetCollapsed(false);
+            }}
+            isOCRActive={activeTab === 'ocr'}
+            hasOCRResult={ocrResults.has(currentPage)}
           />
         </div>
 
         {/* RIGHT PANEL: Controls, Filters & Export */}
         <div className="w-80 lg:w-96 flex-shrink-0 bg-white border-l border-slate-200/80 flex flex-col h-full z-20">
           {/* Desktop Right Panel Tabs */}
-          <div className="grid grid-cols-3 border-b border-slate-200/80 p-2 gap-1 bg-slate-50/70">
+          <div className="grid grid-cols-4 border-b border-slate-200/80 p-1.5 gap-1 bg-slate-50/70">
             <button
               type="button"
               onClick={() => setActiveTab('filters')}
-              className={`flex items-center justify-center py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex items-center justify-center py-2 px-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 activeTab === 'filters'
                   ? 'bg-white text-indigo-950 shadow-xs ring-1 ring-slate-200'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5 mr-1.5 text-indigo-600" />
-              Presets
+              <Sparkles className="w-3.5 h-3.5 mr-1 text-indigo-600 flex-shrink-0" />
+              <span className="truncate">Presets</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('adjust')}
-              className={`flex items-center justify-center py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex items-center justify-center py-2 px-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 activeTab === 'adjust'
                   ? 'bg-white text-indigo-950 shadow-xs ring-1 ring-slate-200'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <Sliders className="w-3.5 h-3.5 mr-1.5 text-blue-600" />
-              Adjust
+              <Sliders className="w-3.5 h-3.5 mr-1 text-blue-600 flex-shrink-0" />
+              <span className="truncate">Adjust</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('ocr')}
+              className={`flex items-center justify-center py-2 px-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer relative ${
+                activeTab === 'ocr'
+                  ? 'bg-white text-indigo-950 shadow-xs ring-1 ring-slate-200'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Brain className="w-3.5 h-3.5 mr-1 text-purple-600 flex-shrink-0" />
+              <span className="truncate">OCR & Read</span>
+              {ocrResults.has(currentPage) && (
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 absolute top-1.5 right-1.5" />
+              )}
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('export')}
-              className={`flex items-center justify-center py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex items-center justify-center py-2 px-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 activeTab === 'export'
                   ? 'bg-white text-indigo-950 shadow-xs ring-1 ring-slate-200'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <Download className="w-3.5 h-3.5 mr-1.5 text-emerald-600" />
-              Export
+              <Download className="w-3.5 h-3.5 mr-1 text-emerald-600 flex-shrink-0" />
+              <span className="truncate">Export</span>
             </button>
           </div>
 
@@ -231,6 +288,40 @@ export const PDFWorkspace: React.FC<PDFWorkspaceProps> = ({
                 activePresetId={activeConfig.presetId}
                 onChange={updateAdjustment}
                 onReset={resetCurrentPage}
+              />
+            )}
+
+            {activeTab === 'ocr' && (
+              <OCRPanel
+                currentPage={currentPage}
+                totalPages={totalPages}
+                currentResult={ocrResults.get(currentPage)}
+                allResults={ocrResults}
+                jobStatus={ocrJobStatus}
+                selectedLang={ocrSelectedLang}
+                selectedEngine={ocrSelectedEngine}
+                enhanceImage={ocrEnhanceImage}
+                ttsState={ocrTtsState}
+                activeSpokenWord={ocrActiveSpokenWord}
+                activeFilterConfig={activeConfig}
+                onSelectLang={setOcrSelectedLang}
+                onSelectEngine={setOcrSelectedEngine}
+                onToggleEnhanceImage={setOcrEnhanceImage}
+                onRecognizeCurrentPage={() => recognizeOcrPage(currentPage, activeConfig)}
+                onRecognizeAllPages={() => recognizeOcrAllPages(totalPages, getPageConfig)}
+                onCancelJob={cancelOcrJob}
+                onPlayTTS={playOcrTTS}
+                onPauseTTS={pauseOcrTTS}
+                onResumeTTS={resumeOcrTTS}
+                onStopTTS={stopOcrTTS}
+                onSetTTSRate={setOcrTTSRate}
+                onCopyCurrentPage={() => copyOcrCurrentPageText(currentPage)}
+                onCopyAllPages={copyOcrAllPagesText}
+                onDownloadCurrentTxt={() => downloadOcrCurrentPageTxt(currentPage)}
+                onDownloadAllTxt={downloadOcrAllTxt}
+                onDownloadAllJSON={downloadOcrAllJSON}
+                onDownloadAllMarkdown={downloadOcrAllMarkdown}
+                onDownloadPDFReport={downloadOcrPDFReport}
               />
             )}
 
@@ -268,6 +359,12 @@ export const PDFWorkspace: React.FC<PDFWorkspaceProps> = ({
             filterConfig={activeConfig}
             onPageChange={setCurrentPage}
             onResetPage={resetCurrentPage}
+            onOpenOCR={() => {
+              setActiveTab('ocr');
+              setIsMobileSheetCollapsed(false);
+            }}
+            isOCRActive={activeTab === 'ocr'}
+            hasOCRResult={ocrResults.has(currentPage)}
           />
         </div>
 
@@ -310,6 +407,25 @@ export const PDFWorkspace: React.FC<PDFWorkspaceProps> = ({
               >
                 <Sliders className="w-3.5 h-3.5 mr-1" />
                 Adjust
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab('ocr');
+                  setIsMobileSheetCollapsed(false);
+                }}
+                className={`flex items-center px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors relative ${
+                  activeTab === 'ocr' && !isMobileSheetCollapsed
+                    ? 'bg-indigo-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                <Brain className="w-3.5 h-3.5 mr-1 text-purple-400" />
+                OCR & Read
+                {ocrResults.has(currentPage) && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1" />
+                )}
               </button>
 
               <button
@@ -385,6 +501,40 @@ export const PDFWorkspace: React.FC<PDFWorkspaceProps> = ({
                   activePresetId={activeConfig.presetId}
                   onChange={updateAdjustment}
                   onReset={resetCurrentPage}
+                />
+              )}
+
+              {activeTab === 'ocr' && (
+                <OCRPanel
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  currentResult={ocrResults.get(currentPage)}
+                  allResults={ocrResults}
+                  jobStatus={ocrJobStatus}
+                  selectedLang={ocrSelectedLang}
+                  selectedEngine={ocrSelectedEngine}
+                  enhanceImage={ocrEnhanceImage}
+                  ttsState={ocrTtsState}
+                  activeSpokenWord={ocrActiveSpokenWord}
+                  activeFilterConfig={activeConfig}
+                  onSelectLang={setOcrSelectedLang}
+                  onSelectEngine={setOcrSelectedEngine}
+                  onToggleEnhanceImage={setOcrEnhanceImage}
+                  onRecognizeCurrentPage={() => recognizeOcrPage(currentPage, activeConfig)}
+                  onRecognizeAllPages={() => recognizeOcrAllPages(totalPages, getPageConfig)}
+                  onCancelJob={cancelOcrJob}
+                  onPlayTTS={playOcrTTS}
+                  onPauseTTS={pauseOcrTTS}
+                  onResumeTTS={resumeOcrTTS}
+                  onStopTTS={stopOcrTTS}
+                  onSetTTSRate={setOcrTTSRate}
+                  onCopyCurrentPage={() => copyOcrCurrentPageText(currentPage)}
+                  onCopyAllPages={copyOcrAllPagesText}
+                  onDownloadCurrentTxt={() => downloadOcrCurrentPageTxt(currentPage)}
+                  onDownloadAllTxt={downloadOcrAllTxt}
+                  onDownloadAllJSON={downloadOcrAllJSON}
+                  onDownloadAllMarkdown={downloadOcrAllMarkdown}
+                  onDownloadPDFReport={downloadOcrPDFReport}
                 />
               )}
 

@@ -80,7 +80,7 @@ export const SplitModal: React.FC<SplitModalProps> = ({
     let isCancelled = false;
     const loadThumbs = async () => {
       const thumbs = new Map<number, string>();
-      for (let p = 1; p <= Math.min(totalPages, 50); p++) {
+      for (let p = 1; p <= totalPages; p++) {
         if (isCancelled) break;
         try {
           const page = await doc.getPage(p);
@@ -358,19 +358,21 @@ export const SplitModal: React.FC<SplitModalProps> = ({
                     Splits the whole document into pieces of N pages each.
                   </p>
                 </div>
-                <div className="mt-2 flex items-center space-x-2">
+                <div className="mt-2.5 flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
                   <span className="text-[11px] font-semibold text-slate-600">Every:</span>
-                  <select
+                  <input
+                    type="number"
+                    min={1}
+                    max={totalPages}
                     value={splitEveryN}
-                    onChange={(e) => setSplitEveryN(Number(e.target.value))}
-                    onClick={(e) => e.stopPropagation()}
-                    className="bg-white border border-slate-300 rounded px-1.5 py-0.5 text-xs font-bold text-indigo-700"
-                  >
-                    <option value={1}>1 Page</option>
-                    <option value={2}>2 Pages</option>
-                    <option value={3}>3 Pages</option>
-                    <option value={5}>5 Pages</option>
-                  </select>
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value, 10);
+                      setSplitEveryN(isNaN(val) || val < 1 ? 1 : Math.min(val, totalPages));
+                    }}
+                    className="w-16 bg-white border border-slate-300 focus:border-indigo-600 rounded-lg px-2 py-0.5 text-xs font-bold text-indigo-700 text-center shadow-2xs"
+                    title="Enter any number of pages without limits"
+                  />
+                  <span className="text-[11px] font-medium text-slate-500">Pages</span>
                 </div>
               </button>
             </div>
@@ -558,15 +560,95 @@ export const SplitModal: React.FC<SplitModalProps> = ({
               </div>
             </div>
           ) : (
-            /* Split Every N preview summary */
-            <div className="p-4 bg-indigo-50/70 border border-indigo-200/80 rounded-2xl space-y-1 text-xs text-indigo-900">
-              <div className="flex items-center font-bold text-sm">
-                <CheckCheck className="w-4 h-4 mr-1.5 text-indigo-600" />
-                Splitting into {pageGroups.length} Separate Files
+            /* Split Every N interactive configurator & preview */
+            <div className="space-y-3">
+              <div className="p-4 bg-indigo-50/70 border border-indigo-200/80 rounded-2xl space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <div className="flex items-center font-bold text-sm text-indigo-950">
+                      <CheckCheck className="w-4 h-4 mr-1.5 text-indigo-600" />
+                      Splitting into {pageGroups.length} Separate Files (ZIP)
+                    </div>
+                    <p className="text-xs text-slate-600 mt-0.5">
+                      The {totalPages}-page document will be divided into files of any custom chunk size without limits.
+                    </p>
+                  </div>
+
+                  {/* Open number input */}
+                  <div className="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-xl border border-indigo-200 shadow-2xs">
+                    <span className="text-xs font-semibold text-slate-700">Split every:</span>
+                    <input
+                      type="number"
+                      min={1}
+                      max={totalPages}
+                      value={splitEveryN}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value, 10);
+                        setSplitEveryN(isNaN(val) || val < 1 ? 1 : Math.min(val, totalPages));
+                      }}
+                      className="w-16 font-bold text-sm text-indigo-700 text-center border-b border-indigo-300 focus:outline-none"
+                    />
+                    <span className="text-xs font-semibold text-slate-700">pages</span>
+                  </div>
+                </div>
+
+                {/* Quick preset pills without limits */}
+                <div className="flex items-center space-x-1.5 flex-wrap gap-y-1.5 pt-1 border-t border-indigo-100">
+                  <span className="text-[11px] font-semibold text-slate-500 mr-1">Quick Sizes:</span>
+                  {[1, 2, 5, 10, 20, 50].filter(n => n <= totalPages).map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setSplitEveryN(n)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        splitEveryN === n
+                          ? 'bg-indigo-600 text-white shadow-xs'
+                          : 'bg-white hover:bg-indigo-100 text-indigo-800 border border-indigo-200'
+                      }`}
+                    >
+                      {n} {n === 1 ? 'Page' : 'Pages'}
+                    </button>
+                  ))}
+                  {totalPages > 2 && (
+                    <button
+                      type="button"
+                      onClick={() => setSplitEveryN(Math.ceil(totalPages / 2))}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        splitEveryN === Math.ceil(totalPages / 2)
+                          ? 'bg-indigo-600 text-white shadow-xs'
+                          : 'bg-white hover:bg-indigo-100 text-indigo-800 border border-indigo-200'
+                      }`}
+                    >
+                      Half ({Math.ceil(totalPages / 2)} Pgs)
+                    </button>
+                  )}
+                </div>
               </div>
-              <p className="text-slate-600">
-                The {totalPages}-page document will be split every {splitEveryN} {splitEveryN === 1 ? 'page' : 'pages'} and bundled into a clean ZIP archive.
-              </p>
+
+              {/* Live Breakdown Cards */}
+              <div className="space-y-1.5">
+                <span className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                  Generated Output Files ({pageGroups.length} Files):
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-44 overflow-y-auto p-1 border border-slate-200 rounded-2xl bg-slate-50/50">
+                  {pageGroups.map((group, idx) => (
+                    <div
+                      key={idx}
+                      className="p-2.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs space-y-0.5"
+                    >
+                      <span className="font-bold text-xs text-indigo-950 block">File #{idx + 1}</span>
+                      <span className="text-[11px] text-slate-500 block">
+                        {group.length === 1
+                          ? `Page ${group[0]}`
+                          : `Pages ${group[0]} - ${group[group.length - 1]}`}
+                      </span>
+                      <span className="text-[10px] font-semibold text-indigo-600 block">
+                        {group.length} {group.length === 1 ? 'page' : 'pages'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 

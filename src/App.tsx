@@ -10,6 +10,7 @@ import {
   Sliders,
   FileCheck,
   Palette,
+  Brain,
 } from 'lucide-react';
 
 export function App() {
@@ -88,7 +89,7 @@ export function App() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-3">
                 <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
                   <Palette className="w-5 h-5" />
@@ -106,6 +107,16 @@ export function App() {
                 <h3 className="font-bold text-base text-slate-900">Advanced Image Controls</h3>
                 <p className="text-xs text-slate-500 leading-relaxed">
                   Finely tune brightness, contrast, saturation, exposure, temperature, and true 3×3 matrix sharpness with live real-time slider debouncing.
+                </p>
+              </div>
+
+              <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                  <Brain className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-base text-slate-900">AI OCR & Audio Reader</h3>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Extract text from scanned PDFs in Malayalam, English, Hindi & 14+ languages. Listen aloud with Speech-to-Audio and export to TXT, JSON or Markdown.
                 </p>
               </div>
 

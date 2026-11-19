@@ -1,5 +1,5 @@
 import React from 'react';
-import { UploadCloud, Sparkles, Shield, Zap, FileCheck, Layers } from 'lucide-react';
+import { UploadCloud, Sparkles, Shield, Zap, FileCheck, Layers, Brain } from 'lucide-react';
 
 interface HeroProps {
   onUploadClick: () => void;
@@ -76,7 +76,7 @@ export const Hero: React.FC<HeroProps> = ({
         </p>
 
         {/* Key Feature Badges */}
-        <div className="mt-10 pt-8 border-t border-slate-200/60 grid grid-cols-2 sm:grid-cols-4 gap-3 text-left">
+        <div className="mt-10 pt-8 border-t border-slate-200/60 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-left">
           <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-xs">
             <div className="flex items-center space-x-2 text-slate-900 font-semibold text-sm mb-1">
               <Layers className="w-4 h-4 text-indigo-600" />
@@ -95,13 +95,21 @@ export const Hero: React.FC<HeroProps> = ({
 
           <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-xs">
             <div className="flex items-center space-x-2 text-slate-900 font-semibold text-sm mb-1">
+              <Brain className="w-4 h-4 text-purple-600" />
+              <span>AI OCR & Reader</span>
+            </div>
+            <p className="text-xs text-slate-500">Multilingual text recognition & audio reading.</p>
+          </div>
+
+          <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-xs">
+            <div className="flex items-center space-x-2 text-slate-900 font-semibold text-sm mb-1">
               <FileCheck className="w-4 h-4 text-emerald-600" />
               <span>Up to 300 DPI</span>
             </div>
             <p className="text-xs text-slate-500">Standard, High, & Ultra-sharp Print export options.</p>
           </div>
 
-          <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-xs">
+          <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-xs col-span-2 sm:col-span-1">
             <div className="flex items-center space-x-2 text-slate-900 font-semibold text-sm mb-1">
               <Shield className="w-4 h-4 text-blue-600" />
               <span>100% Client-Side</span>

@@ -255,35 +255,60 @@ export async function runTesseractOCR(
   const text = (data.text || '').trim();
   const overallConfidence = Math.round(data.confidence || 0);
 
-  const lines: OCRLine[] = (data.lines || []).map((l) => ({
-    text: l.text.trim(),
-    confidence: Math.round(l.confidence || overallConfidence),
-    words: (l.words || []).map((w) => ({
-      text: w.text,
-      confidence: Math.round(w.confidence || overallConfidence),
-      bbox: w.bbox
-        ? {
-            x0: w.bbox.x0,
-            y0: w.bbox.y0,
-            x1: w.bbox.x1,
-            y1: w.bbox.y1,
-          }
-        : undefined,
-    })),
-  }));
+  const lines: OCRLine[] = [];
+  const words: OCRWord[] = [];
 
-  const words: OCRWord[] = (data.words || []).map((w) => ({
-    text: w.text,
-    confidence: Math.round(w.confidence || overallConfidence),
-    bbox: w.bbox
-      ? {
-          x0: w.bbox.x0,
-          y0: w.bbox.y0,
-          x1: w.bbox.x1,
-          y1: w.bbox.y1,
+  if (data.blocks && Array.isArray(data.blocks)) {
+    for (const block of data.blocks) {
+      if (block.paragraphs) {
+        for (const p of block.paragraphs) {
+          if (p.lines) {
+            for (const l of p.lines) {
+              const lineWords: OCRWord[] = (l.words || []).map((w) => ({
+                text: w.text,
+                confidence: Math.round(w.confidence || overallConfidence),
+                bbox: w.bbox
+                  ? {
+                      x0: w.bbox.x0,
+                      y0: w.bbox.y0,
+                      x1: w.bbox.x1,
+                      y1: w.bbox.y1,
+                    }
+                  : undefined,
+              }));
+
+              const trimmedLine = l.text.trim();
+              if (trimmedLine.length > 0) {
+                lines.push({
+                  text: trimmedLine,
+                  confidence: Math.round(l.confidence || overallConfidence),
+                  words: lineWords,
+                });
+              }
+              words.push(...lineWords);
+            }
+          }
         }
-      : undefined,
-  }));
+      }
+    }
+  }
+
+  // Fallback if blocks were not populated
+  if (lines.length === 0 && text.length > 0) {
+    const textLines = text.split('\n').filter((l) => l.trim().length > 0);
+    for (const tl of textLines) {
+      const lWords = tl.split(/\s+/).filter(Boolean).map((w) => ({
+        text: w,
+        confidence: overallConfidence,
+      }));
+      lines.push({
+        text: tl.trim(),
+        confidence: overallConfidence,
+        words: lWords,
+      });
+      words.push(...lWords);
+    }
+  }
 
   return {
     text,

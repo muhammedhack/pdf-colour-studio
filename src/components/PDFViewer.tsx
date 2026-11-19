@@ -11,6 +11,7 @@ import {
   Maximize,
   Minimize,
   RefreshCw,
+  Brain,
 } from 'lucide-react';
 
 interface PDFViewerProps {
@@ -20,6 +21,9 @@ interface PDFViewerProps {
   filterConfig: PageFilterConfig;
   onPageChange: (newPage: number) => void;
   onResetPage: () => void;
+  onOpenOCR?: () => void;
+  isOCRActive?: boolean;
+  hasOCRResult?: boolean;
 }
 
 export const PDFViewer: React.FC<PDFViewerProps> = ({
@@ -28,6 +32,9 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
   totalPages,
   filterConfig,
   onPageChange,
+  onOpenOCR,
+  isOCRActive,
+  hasOCRResult,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const displayCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -188,6 +195,29 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
+
+        {/* OCR Quick Action Button */}
+        {onOpenOCR && (
+          <button
+            type="button"
+            onClick={onOpenOCR}
+            className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              isOCRActive
+                ? 'bg-indigo-600 text-white shadow-2xs'
+                : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/80'
+            }`}
+            title="Scan & Read text with OCR"
+          >
+            <Brain className="w-3.5 h-3.5 text-indigo-500 group-hover:text-indigo-600" />
+            <span>OCR Read</span>
+            {hasOCRResult && (
+              <span
+                className={`w-2 h-2 rounded-full ${isOCRActive ? 'bg-white' : 'bg-emerald-500'} ml-0.5`}
+                title="Page text recognized"
+              />
+            )}
+          </button>
+        )}
 
         {/* Zoom & View Controls */}
         <div className="flex items-center space-x-1">
