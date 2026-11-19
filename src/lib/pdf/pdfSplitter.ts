@@ -238,7 +238,7 @@ export async function splitPDFFiltered(
       await page.render({
         canvasContext: ctx,
         viewport,
-        canvas: sourceCanvas,
+        canvas: null,
       }).promise;
       page.cleanup();
 

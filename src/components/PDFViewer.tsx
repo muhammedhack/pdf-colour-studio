@@ -45,6 +45,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
   const [isRenderingBase, setIsRenderingBase] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [pageInputVal, setPageInputVal] = useState<string>(String(currentPage));
+  const [displayDimensions, setDisplayDimensions] = useState<{ width: number; height: number } | null>(null);
 
   const animFrameRef = useRef<number | null>(null);
 
@@ -84,11 +85,15 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
 
         if (!isCancelled) {
           pristineCanvasRef.current = pristine;
+          const cssWidth = Math.round(pristine.width / dpr);
+          const cssHeight = Math.round(pristine.height / dpr);
+          setDisplayDimensions({ width: cssWidth, height: cssHeight });
           setIsRenderingBase(false);
           renderFilteredDisplay();
         }
-      } catch {
+      } catch (err: unknown) {
         if (!isCancelled) {
+          console.error(`Failed to render page ${currentPage}:`, err);
           setIsRenderingBase(false);
         }
       }
@@ -100,7 +105,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
       isCancelled = true;
       renderer.cancelPageRender(currentPage);
     };
-  }, [renderer, currentPage, zoomScale, renderFilteredDisplay]);
+  }, [renderer, currentPage, zoomScale, isMobile, renderFilteredDisplay]);
 
   // Trigger fast instant filter update whenever filterConfig changes
   useEffect(() => {
@@ -280,7 +285,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
             <div className="absolute inset-0 bg-white/60 backdrop-blur-2xs flex items-center justify-center z-10 transition-opacity">
               <div className="flex items-center space-x-2 bg-slate-900/80 text-white text-xs px-3 py-1.5 rounded-full shadow-lg">
                 <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                <span>Rendering vector...</span>
+                <span>Loading page...</span>
               </div>
             </div>
           )}
@@ -290,8 +295,8 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
             ref={displayCanvasRef}
             className="max-w-none block mx-auto transition-transform duration-75"
             style={{
-              width: pristineCanvasRef.current ? `${pristineCanvasRef.current.width / (window.devicePixelRatio || 1)}px` : 'auto',
-              height: pristineCanvasRef.current ? `${pristineCanvasRef.current.height / (window.devicePixelRatio || 1)}px` : 'auto',
+              width: displayDimensions ? `${displayDimensions.width}px` : 'auto',
+              height: displayDimensions ? `${displayDimensions.height}px` : 'auto',
             }}
           />
         </div>

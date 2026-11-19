@@ -78,7 +78,7 @@ export class PDFPageRenderer {
     const renderTask = page.render({
       canvasContext: ctx,
       viewport,
-      canvas,
+      canvas: null,
     });
     this.activeRenderTasks.set(pageNumber, renderTask);
 

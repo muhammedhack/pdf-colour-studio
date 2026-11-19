@@ -83,7 +83,7 @@ export async function exportFilteredPDF({
     const renderTask = page.render({
       canvasContext: ctx,
       viewport,
-      canvas: sourceCanvas,
+      canvas: null,
     });
 
     await renderTask.promise;
@@ -206,7 +206,7 @@ export async function exportSinglePageImage(
   await page.render({
     canvasContext: ctx,
     viewport,
-    canvas,
+    canvas: null,
   }).promise;
   page.cleanup();
 

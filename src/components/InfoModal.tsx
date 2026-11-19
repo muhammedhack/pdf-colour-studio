@@ -107,6 +107,18 @@ export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, type, onClose }) =
                   </p>
                 </div>
               </div>
+
+              <div className="flex items-start space-x-3 p-3 bg-slate-50 rounded-xl">
+                <div className="w-6 h-6 rounded-full bg-purple-600 text-white font-bold flex items-center justify-center flex-shrink-0 text-xs">
+                  4
+                </div>
+                <div>
+                  <h4 className="font-semibold text-slate-900 text-sm">AI OCR & Audio Reading Setup</h4>
+                  <p className="text-slate-500">
+                    Tesseract.js WASM and PDF.js extract text in Malayalam, English, Hindi, and 14+ languages. Features live Speech-to-Audio reading, in-text search, and export to TXT, JSON, MD, or PDF report.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         )}

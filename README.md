@@ -7,6 +7,23 @@
 
 ## ✨ Features
 
+- **Powerful OCR & Audio Reading Setup 🧠📖**:
+  - **Dual-Engine Processing**:
+    - **Fast Native Digital Vector Text Extraction** (<50ms) for PDFs with existing text layers.
+    - **Deep AI Optical Character Recognition (OCR)** powered by **Tesseract.js WebAssembly** for scanned documents, photos, receipts, and book pages.
+    - **Smart Auto-Detect**: Automatically uses instant vector extraction or runs deep AI OCR based on page content.
+    - **Filter-Enhanced Preprocessing**: Optionally run OCR on binarized / high-contrast enhanced images to dramatically boost recognition on faded or dark scans.
+  - **17+ OCR Languages Supported**: English, Malayalam (മലയാളം), Hindi (हिन्दी), Arabic (العربية), Tamil (தமிழ்), Kannada, Telugu, Bengali, Urdu, Spanish, French, German, and more.
+  - **Built-in Text-To-Speech (TTS) Audio Reader**:
+    - Listen aloud to extracted text with live Play, Pause, Resume, and Stop controls.
+    - Adjustable playback speeds (0.75x, 1.0x, 1.25x, 1.5x) with active spoken word tracking.
+  - **Smart In-Text Search & Highlight**: Search keywords inside extracted page text in real time.
+  - **Multi-Format Export & Sharing**:
+    - Instant one-click copy to clipboard (per page or all pages).
+    - Download as formatted `.txt`.
+    - Download as structured `.json` with bounding boxes and confidence scores.
+    - Download clean `.md` (Markdown).
+    - Generate structured PDF Text Reports.
 - **25+ Photo-Style Presets**:
   - **Basic**: *Original, Grayscale, Real 1-Bit Black & White, High Contrast, Light, Dark*
   - **Artistic**: *Sepia, Vintage, Warm, Cool, Faded, Retro*
@@ -32,6 +49,8 @@
 - **Framework**: React 19 + TypeScript + Vite
 - **Styling**: Tailwind CSS v4 + Lucide React
 - **PDF Engine**: PDF.js (`pdfjs-dist`) WebAssembly worker
+- **AI OCR Engine**: Tesseract.js WebAssembly (`tesseract.js`)
+- **Speech Engine**: Web Speech API (`SpeechSynthesis`)
 - **Export Engine**: `jsPDF` for multi-page document generation
 - **Celebration Effects**: `canvas-confetti`
 

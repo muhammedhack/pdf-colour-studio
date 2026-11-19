@@ -1,9 +1,20 @@
 import * as pdfjs from 'pdfjs-dist';
 import type { PageDimensions, PDFDocumentInfo } from '../../types/pdf';
 
-// Ensure the PDF.js worker is properly linked
+// Helper to compute absolute public asset URLs for PDF.js worker, WASM decoders and fonts
+function getAssetUrl(relativePath: string): string {
+  if (typeof window === 'undefined') return relativePath;
+  const baseUrl = window.location.origin;
+  const basePath = typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL
+    ? (import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`)
+    : '/';
+  const cleanPath = relativePath.startsWith('/') ? relativePath.slice(1) : relativePath;
+  return `${baseUrl}${basePath}${cleanPath}`;
+}
+
+// Ensure the PDF.js worker is properly linked with an absolute URL
 if (typeof window !== 'undefined') {
-  pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
+  pdfjs.GlobalWorkerOptions.workerSrc = getAssetUrl('pdf.worker.min.mjs');
 }
 
 export interface LoadedPDF {
@@ -39,8 +50,10 @@ export async function loadPDFDocument(file: File | ArrayBuffer, fileName: string
 
   const loadingTask = pdfjs.getDocument({
     data: new Uint8Array(arrayBuffer),
-    cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@' + pdfjs.version + '/cmaps/',
+    cMapUrl: getAssetUrl('cmaps/'),
     cMapPacked: true,
+    standardFontDataUrl: getAssetUrl('standard_fonts/'),
+    wasmUrl: getAssetUrl('wasm/'),
   });
 
   try {

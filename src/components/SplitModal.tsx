@@ -92,10 +92,16 @@ export const SplitModal: React.FC<SplitModalProps> = ({
           if (ctx) {
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            await page.render({ canvasContext: ctx, viewport: vp, canvas }).promise;
+            await page.render({ canvasContext: ctx, viewport: vp, canvas: null }).promise;
             thumbs.set(p, canvas.toDataURL('image/jpeg', 0.7));
           }
           page.cleanup();
+
+          // Incrementally update thumbnails every 4 pages so preview is immediately visible
+          if (p % 4 === 0 || p === totalPages) {
+            setThumbnails(new Map(thumbs));
+          }
+
           // Yield main thread
           await new Promise((r) => setTimeout(r, 10));
         } catch {

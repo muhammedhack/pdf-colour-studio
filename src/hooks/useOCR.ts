@@ -48,6 +48,7 @@ export function useOCR({ doc, renderer, docName = 'document' }: UseOCROptions) {
   const [activeSpokenWord, setActiveSpokenWord] = useState<string>('');
 
   const cancelRequestedRef = useRef<boolean>(false);
+  const prevDocRef = useRef(doc);
 
   // Clean up workers and TTS on unmount
   useEffect(() => {
@@ -59,10 +60,13 @@ export function useOCR({ doc, renderer, docName = 'document' }: UseOCROptions) {
 
   // When doc changes, reset results and stop TTS
   useEffect(() => {
-    setResults(new Map());
-    ttsService.stop();
-    setTtsState((prev) => ({ ...prev, isPlaying: false, isPaused: false }));
-    setActiveSpokenWord('');
+    if (prevDocRef.current !== doc) {
+      prevDocRef.current = doc;
+      setResults(new Map());
+      ttsService.stop();
+      setTtsState((prev) => ({ ...prev, isPlaying: false, isPaused: false }));
+      setActiveSpokenWord('');
+    }
   }, [doc]);
 
   /**
